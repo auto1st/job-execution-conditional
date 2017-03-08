@@ -1,4 +1,7 @@
+
 # Job Execution Conditional
+
+[![Build Status](https://travis-ci.org/auto1st/job-execution-conditional.svg?branch=master)](https://travis-ci.org/auto1st/job-execution-conditional)
 
 ## Options
 
