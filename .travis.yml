@@ -4,6 +4,13 @@ jdk:
 - oraclejdk8
 - oraclejdk7
 script: mvn install -B -V
+after_success: |
+  ls $TRAVIS_BUILD_DIR
+  if [ "$TRAVIS_TAG" ]; then
+    echo "preparing the release package..."
+  fi
+after_deploy: | 
+  echo "updating the version for next release..."
 notifications:
   slack:
     rooms:
