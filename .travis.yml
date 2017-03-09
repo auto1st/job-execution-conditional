@@ -5,7 +5,7 @@ jdk:
 - oraclejdk7
 script: mvn install -B -V
 after_success: |
-  ls $TRAVIS_BUILD_DIR
+  ls $TRAVIS_BUILD_DIR/target
   if [ "$TRAVIS_TAG" ]; then
     echo "preparing the release package..."
   fi
@@ -19,7 +19,7 @@ deploy:
   skip_cleanup: true
   provider: releases
   file_glob: true
-  file: release/*
+  file: target/*.jar
   on:
     tags: true
   api_key:
