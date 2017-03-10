@@ -9,7 +9,52 @@
  
   <name>Rundeck Plugin - Job Execution Conditional</name>
   <url>https://github.com/auto1st/job-execution-conditional</url>
+
+  <scm>
+    <url>${url}</url>
+    <connection>scm:git:git://github.com/auto1st/job-execution-conditional.git</connection>
+    <developerConnection>scm:git:git@github.com:auto1st/job-execution-conditional.git</developerConnection>
+  </scm>
+
+  <issueManagement>
+    <url>https://github.com/auto1st/job-execution-conditional/issues</url>
+    <system>GitHub Issues</system>
+  </issueManagement>
+
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
  
+  <build>
+    <plugins>
+      <plugin>
+	<groupId>org.apache.maven.plugins</groupId>
+	<artifactId>maven-jar-plugin</artifactId>
+	<configuration>
+	  <archive>
+	    <manifest>
+	      <addClasspath>true</addClasspath>
+            </manifest>
+	    <manifestEntries>
+	      <Rundeck-Plugin-Version>${version}</Rundeck-Plugin-Version>
+	      <Rundeck-Plugin-Archive>true</Rundeck-Plugin-Archive>
+	      <Rundeck-Plugin-Classnames>com.github.auto1st.rundeck.plugin.JobExecutionConditional</Rundeck-Plugin-Classnames>
+	      <Rundeck-Plugin-Author>Automation First - auto1st - Team</Rundeck-Plugin-Author>
+	      <Rundeck-Plugin-URL>${url}</Rundeck-Plugin-URL>
+	      <Rundeck-Plugin-Name>${name}</Rundeck-Plugin-Name>
+	      <Rundeck-Plugin-Description>Evaluate executions options of another Job</Rundeck-Plugin-Description>
+	      <Rundeck-Plugin-File-Version>${version}</Rundeck-Plugin-File-Version>
+	    </manifestEntries>
+	  </archive>
+	</configuration>
+      </plugin>
+    </plugins>
+  </build>
+
   <dependencies>
     <dependency>
       <groupId>org.rundeck</groupId>
@@ -24,6 +69,6 @@
       <scope>compile</scope>
     </dependency>
   </dependencies>
-  <plugins>
-  </plugins>
+
 </project>
+
