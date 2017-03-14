@@ -1,3 +1,5 @@
+#!/bin/bash
+
 RUNDECK_NAME="http://rundeck.labs.in"
 
 create_container() {
@@ -35,4 +37,8 @@ case $1 in
     create_container) create_container ;;
     deploy) deploy ;;
     clean) clean ;;
+    *)
+        echo "Usage: $0 create_container|deploy|clean"
+        echo "Usage: $0 deploy [MAVEN_OPTIONS]"
+        ;;
 esac
