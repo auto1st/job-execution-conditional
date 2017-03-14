@@ -9,7 +9,34 @@
  
   <name>Rundeck Plugin - Job Execution Conditional</name>
   <url>https://github.com/auto1st/job-execution-conditional</url>
- 
+
+  <build>
+    <resources>
+        <resource>
+            <directory>resources/</directory>
+            <targetPath>resources/</targetPath>
+        </resource>
+    </resources>
+    <plugins>
+      <plugin>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>2.3.2</version>
+        <configuration>
+          <archive>
+            <manifestEntries>
+              <Rundeck-Plugin-Classnames>com.github.auto1st.rundeck.plugin.JobExecutionConditional</Rundeck-Plugin-Classnames>
+              <Rundeck-Plugin-Version>1.2</Rundeck-Plugin-Version>
+              <Rundeck-Plugin-Archive>true</Rundeck-Plugin-Archive>
+              <Rundeck-Plugin-File-Version>1.0.0</Rundeck-Plugin-File-Version>
+              <Rundeck-Plugin-Author>Auto1st</Rundeck-Plugin-Author>
+              <Rundeck-Plugin-URL>https://github.com/auto1st/job-execution-conditional</Rundeck-Plugin-URL>
+            </manifestEntries>
+          </archive>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
   <dependencies>
     <dependency>
       <groupId>org.rundeck</groupId>
