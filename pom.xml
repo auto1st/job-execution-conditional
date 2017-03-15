@@ -33,6 +33,12 @@
   </licenses>
 
   <build>
+    <resources>
+      <resource>
+        <directory>resources/</directory>
+        <targetPath>resources/</targetPath>
+      </resource>
+    </resources>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -60,11 +66,12 @@
             <configuration>
               <outputProperty>plugin-libs</outputProperty>
               <prefix>lib</prefix>
-              <pathSeparator> </pathSeparator>
+              <pathSeparator>
+              </pathSeparator>
             </configuration>
           </execution>
         </executions>
-        
+
         <configuration>
           <includeGroupIds>org.apache.commons</includeGroupIds>
           <includeArtifactIds>commons-lang3</includeArtifactIds>
