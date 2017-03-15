@@ -1,17 +1,20 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
- 
+
   <groupId>com.github.auto1st.rundeck.plugin</groupId>
   <artifactId>job-execution-conditional</artifactId>
   <version>1.0.0</version>
   <packaging>jar</packaging>
- 
+
   <name>Rundeck Plugin - Job Execution Conditional</name>
   <url>https://github.com/auto1st/job-execution-conditional</url>
 
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
   <scm>
-    <url>${url}</url>
+    <url>${project.url}</url>
     <connection>scm:git:git://github.com/auto1st/job-execution-conditional.git</connection>
     <developerConnection>scm:git:git@github.com:auto1st/job-execution-conditional.git</developerConnection>
   </scm>
@@ -28,34 +31,76 @@
       <distribution>repo</distribution>
     </license>
   </licenses>
- 
+
   <build>
     <plugins>
       <plugin>
-	<groupId>org.apache.maven.plugins</groupId>
-	<artifactId>maven-jar-plugin</artifactId>
-	<configuration>
-	  <archive>
-	    <manifest>
-	      <addClasspath>true</addClasspath>
-            </manifest>
-	    <manifestEntries>
-	      <Rundeck-Plugin-Version>${version}</Rundeck-Plugin-Version>
-	      <Rundeck-Plugin-Archive>true</Rundeck-Plugin-Archive>
-	      <Rundeck-Plugin-Classnames>com.github.auto1st.rundeck.plugin.JobExecutionConditional</Rundeck-Plugin-Classnames>
-	      <Rundeck-Plugin-Author>Automation First - auto1st - Team</Rundeck-Plugin-Author>
-	      <Rundeck-Plugin-URL>${url}</Rundeck-Plugin-URL>
-	      <Rundeck-Plugin-Name>${name}</Rundeck-Plugin-Name>
-	      <Rundeck-Plugin-Description>Evaluate executions options of another Job</Rundeck-Plugin-Description>
-	      <Rundeck-Plugin-File-Version>${version}</Rundeck-Plugin-File-Version>
-	    </manifestEntries>
-	  </archive>
-	</configuration>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy-dependencies</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/classes/lib</outputDirectory>
+              <overWriteReleases>false</overWriteReleases>
+              <overWriteSnapshots>true</overWriteSnapshots>
+              <overWriteIfNewer>true</overWriteIfNewer>
+            </configuration>
+          </execution>
+          <execution>
+            <id>build-classpath</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>build-classpath</goal>
+            </goals>
+            <configuration>
+              <outputProperty>plugin-libs</outputProperty>
+              <prefix>lib</prefix>
+              <pathSeparator> </pathSeparator>
+            </configuration>
+          </execution>
+        </executions>
+        
+        <configuration>
+          <includeGroupIds>org.apache.commons</includeGroupIds>
+          <includeArtifactIds>commons-lang3</includeArtifactIds>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>2.3.2</version>
+        <configuration>
+          <archive>
+            <manifestEntries>
+              <Rundeck-Plugin-Version>1.2</Rundeck-Plugin-Version>
+              <Rundeck-Plugin-Archive>true</Rundeck-Plugin-Archive>
+              <Rundeck-Plugin-Classnames>com.github.auto1st.rundeck.plugin.JobExecutionConditional</Rundeck-Plugin-Classnames>
+              <Rundeck-Plugin-Author>Automation First - auto1st - Team</Rundeck-Plugin-Author>
+              <Rundeck-Plugin-URL>${project.url}</Rundeck-Plugin-URL>
+              <Rundeck-Plugin-Name>${project.name}</Rundeck-Plugin-Name>
+              <Rundeck-Plugin-Description>Evaluate executions options of another Job</Rundeck-Plugin-Description>
+              <Rundeck-Plugin-File-Version>${project.version}</Rundeck-Plugin-File-Version>
+
+              <Rundeck-Plugin-Libs>${plugin-libs}</Rundeck-Plugin-Libs>
+            </manifestEntries>
+          </archive>
+        </configuration>
       </plugin>
     </plugins>
   </build>
 
   <dependencies>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.5</version>
+    </dependency>
+
     <dependency>
       <groupId>org.rundeck</groupId>
       <artifactId>rundeck-core</artifactId>
@@ -63,9 +108,21 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>org.codehaus.groovy</groupId>
-      <artifactId>groovy-all</artifactId>
-      <version>2.3.7</version>
+      <groupId>org.grails</groupId>
+      <artifactId>grails-core</artifactId>
+      <version>2.4.4</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.grails</groupId>
+      <artifactId>grails-web</artifactId>
+      <version>2.4.4</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-core</artifactId>
+      <version>4.3.6.Final</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>
