@@ -7,11 +7,11 @@
 
 * Reference to job: UUID to job, in the same project, to analyse it's executions.
 
-* Number of executions to analyse: maximum number of latest executions will analized.
+* Number of executions to analyse: maximum number of latest executions will analyzed.
 
-* Analyze failed: analyze the execution, even it's fail
+* Analyze failed: analyze the execution, even if it was failed
 
-* Option condition: use options values to get a true comparation
+* Option condition: use options values to get a true comparison
  
 
 

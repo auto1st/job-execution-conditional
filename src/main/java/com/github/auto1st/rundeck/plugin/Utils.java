@@ -22,8 +22,6 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.sun.jna.platform.win32.OaIdl.VARDESC._VARDESC;
-
 /**
  * Utilities.
  * 
@@ -46,38 +44,17 @@ public final class Utils {
 	}
 	
 	/**
-	 * Extract the pairs from <code>VAR=${option.VAR3}</code>, where <code>"VAR"</code> is the key and <code>"${option.VAR3}"</code> is the value
-	 * @param value The text with various lines
-	 * @return <code>java.util.Map</code>
-	 */
-	/*
-	public static Map<String, String> optionsOf(final String value) {
-		final Map<String, String> _result = new HashMap<String, String>();
-		
-		final Pattern pattern = Pattern.compile(Utils.PROPERTIES.getProperty("regex.option"));
-		final Matcher matcher = pattern.matcher(value);
-		while(matcher.find()){
-			String group = matcher.group();
-			
-			String[] parts = group.split("=");
-			_result.put(parts[0], parts[1]);
-		}
-		
-		return _result;
-	}*/
-	
-	/**
    * Extract the pairs from <code>-VAR=${option.VAR3}</code>, where <code>"VAR"</code> is the key and <code>"${option.VAR3}"</code> is the value
-   * @param value The text with various lines
+   * @param value The text with one or more pairs
    * @return <code>java.util.Map</code>
    */
-	public static Map<String, String> optionsOf(final String value) {
+	public static Map<String, String> conditionsOf(final String value) {
     final Map<String, String> _result = new HashMap<String, String>();
     
     final Pattern pattern = Pattern.compile(Utils.PROPERTIES.getProperty("regex.option"));
     final Matcher matcher = pattern.matcher(value);
     while(matcher.find()){
-      String _key   = matcher.group(1);
+      String _key = matcher.group(1);
       
       //remove the hyphen symbol
       _key = _key.substring(1);
@@ -91,6 +68,41 @@ public final class Utils {
     
     return _result;
   }
+	
+	/**
+	 * Extract the pairs from <code>-VAR0 value -VAR1 value</code>, where <code>"VAR0"</code> is the key and <code>"value"</code> is the value.
+	 * @param text The text with one or more pairs
+	 * @return <code>java.util.Map</code>
+	 */
+	public static Map<String, String> optionsOf(final String text) {
+	  final Map<String, String> _result = new HashMap<String, String>();
+	  
+	  final Pattern pattern = Pattern.compile(Utils.PROPERTIES.getProperty("regex.args"));
+	  final Matcher matcher = pattern.matcher(text);
+	  
+	  while(matcher.find()){
+	    
+	    /*
+	     * Part one: execution key
+	     */
+	    String _key = matcher.group(1);
+	    
+      //remove the hyphen and get VAR0
+      _key = _key.substring(1);
+      
+      //remove spaces
+      _key = _key.trim();
+      
+      /*
+       * Part two: execution value
+       */
+      String _value = matcher.group(2);
+      
+      _result.put(_key, _value);
+	  }
+	  
+	  return _result;
+	}
 	
 	/**
 	 * Expand the expression equals this <code>${option.VAR3}</code>, getting the value from data context.<br/>

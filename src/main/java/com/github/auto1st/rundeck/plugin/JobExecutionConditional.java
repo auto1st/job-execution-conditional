@@ -18,8 +18,7 @@ package com.github.auto1st.rundeck.plugin;
 
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Set;
 
 import org.apache.commons.lang3.reflect.MethodUtils;
 import org.codehaus.groovy.grails.commons.GrailsApplication;
@@ -36,8 +35,7 @@ import com.dtolabs.rundeck.core.plugins.Plugin;
 import com.dtolabs.rundeck.plugins.ServiceNameConstants;
 import com.dtolabs.rundeck.plugins.descriptions.PluginDescription;
 import com.dtolabs.rundeck.plugins.descriptions.PluginProperty;
-import com.dtolabs.rundeck.plugins.descriptions.RenderingOption;
-import com.dtolabs.rundeck.plugins.descriptions.RenderingOptions;
+import com.dtolabs.rundeck.plugins.descriptions.TextArea;
 import com.dtolabs.rundeck.plugins.step.PluginStepContext;
 import com.dtolabs.rundeck.plugins.step.StepPlugin;
 
@@ -67,17 +65,17 @@ public class JobExecutionConditional implements StepPlugin {
 	String jobUUID;
 	
 	@PluginProperty(title = "Maximum executions", 
-	                description = "Maximum number of latest executions to analize", 
+	                description = "Maximum number of latest executions to analyze", 
 	                defaultValue = "0")
 	Integer maximumExecutions;
 	
 	@PluginProperty(title = "Analyze failed", 
-	                description = "Analyze the execution, even it's fail")
+	                description = "Analyze the execution, even if it was failed")
 	Boolean analyzeFailed;
 	
 	
 	@PluginProperty(title = "Option condition",
-			            description = "Use options values to get a true comparation"
+			            description = "Use options values to get a true comparison"
 	                              + "\n"
 			                          + "* One option per line"
 			                          + "\n"
@@ -86,65 +84,11 @@ public class JobExecutionConditional implements StepPlugin {
 			                          + "`-OPTION_NAME_A=${option.OPTION_0} -OPTION_NAME_B=${option.OPTION_1}`",
 			            validatorClass = OptionConditionValidator.class,
 			            required = true)
-	@RenderingOptions({
-	  @RenderingOption(key = "displayType",          value = "CODE"),
-	  @RenderingOption(key = "codeSyntaxMode",       value = "sh"),
-	  @RenderingOption(key = "codeSyntaxSelectable", value = "false")
-	})
+	@TextArea
 	String optionCondition;
 	
 	private static enum Failures implements FailureReason {
 	  GeneralFailure
-	}
-
-	private void poc(final PluginStepContext context)  throws Exception {
-	
-		final JobService jobService = context.getExecutionContext().getJobService();
-		final JobReference job = jobService.jobForID(jobUUID, context.getFrameworkProject());
-		context.getLogger().log(4, "JOB ID: " + job.getId());
-		
-		final Class<?> Execution = Class.forName("rundeck.Execution");
-		context.getLogger().log(4, "EXECUTION CLASS: " + Execution);
-		
-		final GrailsApplication grails = Holders.getGrailsApplication();
-		context.getLogger().log(4, "GRAILS APPL: " + grails);
-				
-		final ApplicationContext grailsContext = grails.getMainContext();
-		context.getLogger().log(4, "GRAILS CONTEXT: " + grailsContext);
-		
-		context.getLogger().log(4, "SESSION FACTORY: " + grailsContext.getBean("sessionFactory"));
-		
-		final SessionFactory factory = (SessionFactory)grailsContext.getBean("sessionFactory");
-		
-		final Session session = factory.openSession();
-		context.getLogger().log(4, "NEW SESSION: " + session);
-		
-		final Query query = session.createQuery("from Execution e where e.scheduledExecution.uuid = :uuid");
-		query.setParameter("uuid", job.getId());
-		
-		final Pattern pattern = Pattern.compile(Utils.PROPERTIES.getProperty("regex.args"));
-				
-		final List<?> _executions = query.list();
-		context.getLogger().log(4, "EXECUTIONS: " + _executions);
-		for(int _index = 0; _index < _executions.size(); _index++){
-			Object _execution = _executions.get(_index);
-			context.getLogger().log(4, _execution.getClass().toString());
-			
-			Object _argStringObj = MethodUtils.invokeMethod(_execution, "getArgString");
-			context.getLogger().log(4, "ARGS: " + _argStringObj);
-			
-			if(_argStringObj instanceof String){
-				Matcher matcher = pattern.matcher((String)_argStringObj);
-				while(matcher.find()){
-					context.getLogger().log(4, matcher.group(1));
-					context.getLogger().log(4, matcher.group(2));
-				}
-			}
-			
-		}
-		
-		session.close();
-		
 	}
 
 	@Override
@@ -158,7 +102,8 @@ public class JobExecutionConditional implements StepPlugin {
 	  /*
 	   * Extract options from optionCondition
 	   */
-	  final Map<String, String> _options = Utils.optionsOf(optionCondition);
+	  final Map<String, String> _conditions = Utils.conditionsOf(optionCondition);
+	  final Set<String> _conditionsKeys     = _conditions.keySet();
 	  
 	  /*
 	   * Hack to get the hibernate session from Grails APP
@@ -185,11 +130,6 @@ public class JobExecutionConditional implements StepPlugin {
 	    final Query query = session.createQuery(EXECUTIONS_QUERY_ALL);
 	    query.setParameter(EXECUTIONS_QUERY_ALL_PARAM0, job.getId());
 	    
-	    /*
-	     * Pattern to process the argString: -VAR0 value -VAR1 value
-	     */
-	    final Pattern pattern = Pattern.compile(Utils.PROPERTIES.getProperty("regex.args"));
-	    
 	    //execute the query
 	    final List<?> _executions = query.list();
 	    
@@ -204,6 +144,7 @@ public class JobExecutionConditional implements StepPlugin {
 	    for(int _index = 0; _index < _executions.size(); _index++){
 	      Object _execution = _executions.get(_index);
 	      
+	      //local boolean accumulator
 	      boolean _local = true;
 	      
 	      /*
@@ -212,39 +153,19 @@ public class JobExecutionConditional implements StepPlugin {
 	      Object _argStringObj = MethodUtils.invokeMethod(_execution, METHOD_GET_ARGSTRING);
 	      
 	      if(_argStringObj instanceof String){
-	        /*
-	         * Process the argString, to extract the groups.
-	         */
-	        Matcher matcher = pattern.matcher((String)_argStringObj);
 	        
 	        /*
-	         * While has groups.
+	         * Extract the pairs from argString used by the Execution
 	         */
-	        while(matcher.find()){
-	          /*
-	           * Part one: -VAR0
-	           */
-	          String _executionKey = matcher.group(1);
-	          
-	          //remove the hyphen and get VAR0
-	          _executionKey = _executionKey.substring(1);
-	          
-	          //remove spaces
-	          _executionKey = _executionKey.trim();
-	          
-	          /*
-	           * Part two: execution value
-	           */
-	          String _executionValue = matcher.group(2);
-	          
-	          context.getLogger().log(4, "EXECUTION VALUE: " + _executionValue);
-	          context.getLogger().log(4, "          VALUE: " + _options.get(_executionKey));
-	          
-	          /*
-	           * Check if _executionValue is equal to value.
-	           */
-	          _local = _local 
-	                   && _executionValue.equals(_options.get(_executionKey));
+	        Map<String, String> _options = Utils.optionsOf((String)_argStringObj);
+	        
+	        /*
+	         * For each condition
+	         */
+	        for(String _key:_conditionsKeys){
+	          //compare the condition value to execution option value
+	          _local = _local &&
+	                   _conditions.get(_key).equals(_options.get(_key));
 	        }
 	      }
 	      
@@ -252,7 +173,7 @@ public class JobExecutionConditional implements StepPlugin {
 	      _continue = _local;
 	      
 	      /*
-         * When the first true compare is found, breaks the looping.
+         * When the first true compare is found, breaks the loop.
          */
         if(_local){
           break;
@@ -261,11 +182,11 @@ public class JobExecutionConditional implements StepPlugin {
 	    
 	    if(_continue){
 	      //conditions are met
-	      context.getLogger().log(2, "[" + PROVIDER_NAME + "] Conditions are met: " + _options);
+	      context.getLogger().log(2, "Conditions are met: " + _conditions);
 	    }else{
 	      //conditions aren't met
-	      context.getLogger().log(0, "[" + PROVIDER_NAME + "] Conditions aren't met: " + _options);
-	      context.getFlowControl().Halt("No true comparation found");
+	      context.getLogger().log(0, "Conditions aren't met: " + _conditions);
+	      context.getFlowControl().Halt("No true comparison found");
 	    }
 	     
 	  }catch(Exception e){
