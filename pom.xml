@@ -43,6 +43,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
+        <version>2.8</version>
         <executions>
           <execution>
             <id>copy-dependencies</id>
@@ -66,8 +67,7 @@
             <configuration>
               <outputProperty>plugin-libs</outputProperty>
               <prefix>lib</prefix>
-              <pathSeparator>
-              </pathSeparator>
+              <pathSeparator>&#160;</pathSeparator>
             </configuration>
           </execution>
         </executions>

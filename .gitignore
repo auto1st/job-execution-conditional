@@ -16,3 +16,10 @@ hs_err_pid*
 target/
 build/
 *.iml
+
+# ignore eclipse metada
+.classpath
+.settings
+.project
+.externalToolBuilders/
+
