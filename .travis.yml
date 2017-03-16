@@ -1,8 +1,6 @@
 language: java
 jdk:
 - openjdk7
-- oraclejdk8
-- oraclejdk7
 script: mvn install -B -V
 after_success: |
   ls $TRAVIS_BUILD_DIR/target
