@@ -5,13 +5,13 @@
 
 ## Options
 
-* Reference to job: UUID to job, in the same project, to analyse it's executions.
+* __Reference to job__ UUID to job, in the same project, to analyse it's executions.
 
-* Number of executions to analyse: maximum number of latest executions will analyzed.
+* __Number of executions to analyse__ maximum number of latest executions will analyzed.
 
-* Analyze failed: analyze the execution, even if it was failed
+* __Analyze failed__ analyze the execution, even if it was failed
 
-* Option condition: use options values to get a true comparison
+* __Option condition__ use options values to get a true comparison
  
 
 

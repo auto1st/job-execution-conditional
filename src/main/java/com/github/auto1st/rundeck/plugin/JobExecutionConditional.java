@@ -51,9 +51,13 @@ import grails.util.Holders;
 @PluginDescription(title = "Job Execution Conditional", description = "Evaluate executions options of another Job")
 public class JobExecutionConditional implements StepPlugin {
 
-  private static final String SESSION_FACTORY = "sessionFactory";
-  private static final String EXECUTIONS_QUERY_ALL = "from Execution e where e.scheduledExecution.uuid = :uuid";
-  private static final String EXECUTIONS_QUERY_ALL_PARAM0 = "uuid";
+  private static final String SESSION_FACTORY                         = "sessionFactory";
+  private static final String EXECUTIONS_QUERY_ALL_SUCCEEDED          = "from Execution e where e.scheduledExecution.uuid = :uuid AND e.status = 'succeeded'";
+  private static final String EXECUTIONS_QUERY_ALL_SUCCEEDED_OR_OTHER = "from Execution e where e.scheduledExecution.uuid = :uuid AND (e.status = 'succeeded' OR e.status = :status)";
+  private static final String EXECUTIONS_QUERY_ALL_PARAM0             = "uuid";
+  private static final String EXECUTIONS_QUERY_ALL_PARAM1             = "status";
+  
+  private static final String STATUS_FAILED = "failed";
 
   private static final String METHOD_GET_ARGSTRING = "getArgString";
 
@@ -63,6 +67,11 @@ public class JobExecutionConditional implements StepPlugin {
                   description = "UUID for the Job", 
                   required = true)
   String jobUUID;
+  
+  @PluginProperty(title = "Custom message",
+                  description = "Configure a custom message to show when fail",
+                  defaultValue = "No true comparison found")
+  String message;
 
   @PluginProperty(title = "Maximum executions", 
                   description = "Maximum number of latest executions to analyze", 
@@ -75,9 +84,11 @@ public class JobExecutionConditional implements StepPlugin {
 
   @PluginProperty(title = "Option condition", 
                   description = "Use options values to get a true comparison" 
-                                + "\n"
-                                + "* One option per line" + "\n" + "Example:" + "\n"
-                                + "`-OPTION_NAME_A=${option.OPTION_0} -OPTION_NAME_B=${option.OPTION_1}`",
+                                + "\n\n\n"
+                                + "*Use the following syntax*"
+                                + "\n\n" 
+                                + "Example:" + "\n"
+                                + "`-OPTION_NAME_A=${option.OPTION_0} -OPTION_NAME_B=${option.OPTION_1} -OPTION_NAME_C=literal`",
                   validatorClass = OptionConditionValidator.class, 
                   required = true)
   @TextArea
@@ -119,13 +130,36 @@ public class JobExecutionConditional implements StepPlugin {
        * Start a new hibernate session.
        */
       session = factory.openSession();
-
+      
       /*
-       * Execute the query.
+       * Query.
        */
-      final Query query = session.createQuery(EXECUTIONS_QUERY_ALL);
-      query.setParameter(EXECUTIONS_QUERY_ALL_PARAM0, job.getId());
+      Query query = null;
+      
+      /*
+       * Analyzed failed?
+       */
+      if(Boolean.TRUE.equals(analyzeFailed)){
+        
+        //yes, query the succeeded or failed
+        query = session.createQuery(EXECUTIONS_QUERY_ALL_SUCCEEDED_OR_OTHER);
+        query.setParameter(EXECUTIONS_QUERY_ALL_PARAM1, STATUS_FAILED);
+        
+      } else {
+        
+        //no, select just the succeeded
+        query = session.createQuery(EXECUTIONS_QUERY_ALL_SUCCEEDED);
+        
+      }
 
+      //set the job uuid
+      query.setParameter(EXECUTIONS_QUERY_ALL_PARAM0, job.getId());
+           
+      //is there maximum executions?
+      if(maximumExecutions > 0){
+        query.setMaxResults(maximumExecutions);
+      }
+      
       // execute the query
       final List<?> _executions = query.list();
 
@@ -181,7 +215,7 @@ public class JobExecutionConditional implements StepPlugin {
       } else {
         // conditions aren't met
         context.getLogger().log(0, "Conditions aren't met: " + _conditions);
-        context.getFlowControl().Halt("No true comparison found");
+        context.getFlowControl().Halt(message);
       }
 
     } catch (Exception e) {
