@@ -3,6 +3,8 @@
 
 [![Build Status](https://travis-ci.org/auto1st/job-execution-conditional.svg?branch=master)](https://travis-ci.org/auto1st/job-execution-conditional)
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/774fcf0fe1e24543ad241e0303673a53)](https://www.codacy.com/app/fabiojose/job-execution-conditional?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=auto1st/job-execution-conditional&amp;utm_campaign=Badge_Grade)
+
 ## Options
 
 * __Reference to job__ UUID to job, in the same project, to analyse it's executions.
