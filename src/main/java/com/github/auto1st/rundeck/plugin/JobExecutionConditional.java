@@ -52,8 +52,8 @@ import grails.util.Holders;
 public class JobExecutionConditional implements StepPlugin {
 
   private static final String SESSION_FACTORY                         = "sessionFactory";
-  private static final String EXECUTIONS_QUERY_ALL_SUCCEEDED          = "from Execution e where e.scheduledExecution.uuid = :uuid AND e.status = 'succeeded'";
-  private static final String EXECUTIONS_QUERY_ALL_SUCCEEDED_OR_OTHER = "from Execution e where e.scheduledExecution.uuid = :uuid AND (e.status = 'succeeded' OR e.status = :status)";
+  private static final String EXECUTIONS_QUERY_ALL_SUCCEEDED          = "from Execution e where e.dateCompleted is not null AND e.scheduledExecution.uuid = :uuid AND e.status = 'succeeded' ORDER BY e.dateCompleted DESC";
+  private static final String EXECUTIONS_QUERY_ALL_SUCCEEDED_OR_OTHER = "from Execution e where e.dateCompleted is not null AND e.scheduledExecution.uuid = :uuid AND (e.status = 'succeeded' OR e.status = :status) ORDER BY e.dateCompleted DESC";
   private static final String EXECUTIONS_QUERY_ALL_PARAM0             = "uuid";
   private static final String EXECUTIONS_QUERY_ALL_PARAM1             = "status";
   
@@ -66,21 +66,23 @@ public class JobExecutionConditional implements StepPlugin {
   @PluginProperty(title = "Job UUID",
                   description = "UUID for the Job", 
                   required = true)
-  String jobUUID;
+  protected String jobUUID;
   
   @PluginProperty(title = "Custom message",
                   description = "Configure a custom message to show when fail",
                   defaultValue = "No true comparison found")
-  String message;
+  protected String message;
 
   @PluginProperty(title = "Maximum executions", 
-                  description = "Maximum number of latest executions to analyze", 
+                  description = "Maximum number of latest executions to analyze"
+                                + "\n\n"
+                                + "`0` for all", 
                   defaultValue = "0")
-  Integer maximumExecutions;
+  protected Integer maximumExecutions;
 
   @PluginProperty(title = "Analyze failed", 
                   description = "Analyze the execution, even if it was failed")
-  Boolean analyzeFailed;
+  protected Boolean analyzeFailed;
 
   @PluginProperty(title = "Option condition", 
                   description = "Use options values to get a true comparison" 
@@ -92,7 +94,7 @@ public class JobExecutionConditional implements StepPlugin {
                   validatorClass = OptionConditionValidator.class, 
                   required = true)
   @TextArea
-  String optionCondition;
+  protected String optionCondition;
 
   private static enum Failures implements FailureReason {
     GeneralFailure

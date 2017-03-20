@@ -16,6 +16,9 @@
 
 package com.github.auto1st.rundeck.plugin;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import com.dtolabs.rundeck.core.plugins.configuration.PropertyValidator;
 import com.dtolabs.rundeck.core.plugins.configuration.ValidationException;
 
@@ -30,24 +33,27 @@ public class OptionConditionValidator implements PropertyValidator {
 	@Override
 	public boolean isValid(final String value) throws ValidationException {
 		
-
-	  /*
-		LineNumberReader _reader = new LineNumberReader(new StringReader(value));
-		try{
-			while( _reader.readLine() != null);
-		}catch(IOException e){}
-
-		final Pattern pattern = Pattern.compile(Utils.PROPERTIES.getProperty("regex.option"));
-		final Matcher matcher = pattern.matcher(value);
-		int _counter = 0;
-		while(matcher.find()){
-			_counter++;
-		}
-		
-		return (_reader.getLineNumber() == _counter);
-		*/
 	  
-	  return true;
+	  final Pattern _pattern = Pattern.compile(Utils.PROPERTIES.getProperty("regex.condition"));
+	  final Matcher _matcher = _pattern.matcher(value);
+	  
+	  int _length = 0;
+	  
+	  /*
+	   * For each match
+	   */
+	  while(_matcher.find()){
+	    /*
+	     * Get the length of group and accumulate
+	     */
+	    _length+=_matcher.group(1).length();
+	  }
+	  
+	  /*
+	   * false: invalid because there are unmatched characters
+	   * true.: valid
+	   */
+	  return value.length() == _length;
 	}
 
 }

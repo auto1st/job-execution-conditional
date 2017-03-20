@@ -38,7 +38,7 @@ public final class Utils {
     try {
       PROPERTIES.load(JobExecutionConditional.class.getResourceAsStream("/resources/plugin.properties"));
     } catch (IOException e) {
-      throw new RuntimeException(e.getMessage(), e);
+      throw new PropertiesNotFoundException(e.getMessage(), e);
     }
   };
 
