@@ -76,8 +76,8 @@ public class JobExecutionConditional implements StepPlugin {
   @PluginProperty(title = "Maximum executions", 
                   description = "Maximum number of latest executions to analyze"
                                 + "\n\n"
-                                + "`0` for all", 
-                  defaultValue = "0")
+                                + "`0` for all (should affect the performance)", 
+                  defaultValue = "10")
   protected Integer maximumExecutions;
 
   @PluginProperty(title = "Analyze failed", 
@@ -127,6 +127,11 @@ public class JobExecutionConditional implements StepPlugin {
        * Get the job reference by UUID
        */
       final JobReference job = jobService.jobForID(jobUUID, context.getFrameworkProject());
+      
+      /*
+       * Log the job name.
+       */
+      context.getLogger().log(2, "Job Name: " + job.getJobAndGroup());
 
       /*
        * Start a new hibernate session.
@@ -183,7 +188,7 @@ public class JobExecutionConditional implements StepPlugin {
          * Get the argString value. The options list used by the execution.
          */
         Object _argStringObj = MethodUtils.invokeMethod(_execution, METHOD_GET_ARGSTRING);
-
+        
         if (_argStringObj instanceof String) {
 
           /*
